@@ -1,0 +1,29 @@
+[Unit]
+Description=Raspberry Pi Stateless Grafana Dashboard
+Documentation=https://github.com/your-repo/grafana-dashboard
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=atharvmunot004
+Group=atharvmunot004
+WorkingDirectory=/home/atharvmunot004/graphana-dashboard
+ExecStart=/usr/bin/python3 /home/atharvmunot004/graphana-dashboard/dashboard_server.py --bind 0.0.0.0 --port 9100 --metrics-endpoint http://100.67.229.89:9000/latest --poll-interval 15 --timeout 10 --max-age 30
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pi-grafana-dashboard
+
+# Resource limits
+MemoryMax=60M
+CPUQuota=25%
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+

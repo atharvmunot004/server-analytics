@@ -1,0 +1,17 @@
+[Unit]
+Description=Lightweight Node Monitor Web Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/monitor
+Environment="MONITOR_DIR=%h/monitor"
+ExecStart=/usr/bin/python3 %h/monitor/web_server.py
+Restart=always
+RestartSec=10
+StandardOutput=append:%h/monitor/out/web_server.log
+StandardError=append:%h/monitor/out/web_server.log
+
+[Install]
+WantedBy=default.target
+

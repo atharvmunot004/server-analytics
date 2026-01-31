@@ -1,0 +1,21 @@
+# Monitor output and logs
+monitor/out/metrics.json
+monitor/out/events.log
+monitor/out/web_server.log
+monitor/out/web_server.log*
+monitor/out/.snapshot_state
+
+# Syncthing
+.stfolder/
+**/.stfolder/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

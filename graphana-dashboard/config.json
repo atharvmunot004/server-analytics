@@ -1,0 +1,158 @@
+{
+  "project": "raspberry_pi_stateless_grafana_dashboard",
+  "target_hardware": "raspberry_pi_3",
+  "runtime": {
+    "language": "python",
+    "version": "3.9.2",
+    "memory_budget_mb": 60,
+    "cpu_budget_percent": 25
+  },
+  "statelessness": {
+    "disk_io": false,
+    "file_reads": false,
+    "file_writes": false,
+    "in_memory_only": true,
+    "no_persistence_across_restart": true
+  },
+  "metrics_source": {
+    "type": "http_json",
+    "endpoint": "http://100.67.229.89:9000/latest",
+    "poll_interval_seconds": 15,
+    "timeout_seconds": 10,
+    "expected_shape": {
+      "ts": "unix_epoch_seconds",
+      "cpu.usage_percent": "float",
+      "cpu.load_1m": "float",
+      "memory.available_mb": "int",
+      "memory.total_mb": "int",
+      "thermal.cpu_temp_c": "float",
+      "disk.read_sectors": "counter",
+      "disk.write_sectors": "counter",
+      "network.rx_bytes": "counter",
+      "network.tx_bytes": "counter"
+    }
+  },
+  "internal_processing": {
+    "state_model": "single_latest_sample",
+    "ring_buffer": {
+      "enabled": false
+    },
+    "derived_metrics": {
+      "enabled": true,
+      "method": "rate_from_counter",
+      "fields": [
+        "disk.read_sectors",
+        "disk.write_sectors",
+        "network.rx_bytes",
+        "network.tx_bytes"
+      ],
+      "reset_on_restart": true
+    },
+    "staleness_handling": {
+      "detect_if_ts_not_advancing": true,
+      "max_age_seconds": 30,
+      "on_stale": "mark_unhealthy"
+    }
+  },
+  "export_interface": {
+    "type": "local_http",
+    "bind": "127.0.0.1",
+    "port": 9100,
+    "endpoints": {
+      "/metrics": {
+        "returns": "latest_sample_only",
+        "format": "json_object",
+        "always_fresh": true
+      },
+      "/health": {
+        "returns": {
+          "status": "ok | stale",
+          "last_seen_ts": "unix_epoch_seconds"
+        }
+      }
+    }
+  },
+  "grafana": {
+    "datasource": {
+      "type": "json_http",
+      "url": "http://127.0.0.1:9100/metrics",
+      "refresh_interval_seconds": 15,
+      "time_field": "ts"
+    },
+    "dashboard": {
+      "style": "visual_first",
+      "panels": [
+        {
+          "title": "CPU Usage %",
+          "type": "timeseries",
+          "field": "cpu.usage_percent",
+          "unit": "percent"
+        },
+        {
+          "title": "CPU Load (1m)",
+          "type": "timeseries",
+          "field": "cpu.load_1m"
+        },
+        {
+          "title": "Available Memory",
+          "type": "timeseries",
+          "field": "memory.available_mb",
+          "unit": "MB"
+        },
+        {
+          "title": "CPU Temperature",
+          "type": "timeseries",
+          "field": "thermal.cpu_temp_c",
+          "unit": "celsius",
+          "thresholds": [70, 85]
+        },
+        {
+          "title": "Disk Read / Write Rate",
+          "type": "timeseries",
+          "fields": [
+            "disk.read_sectors_rate",
+            "disk.write_sectors_rate"
+          ]
+        },
+        {
+          "title": "Network RX / TX",
+          "type": "timeseries",
+          "fields": [
+            "network.rx_bytes_rate",
+            "network.tx_bytes_rate"
+          ]
+        }
+      ]
+    }
+  },
+  "systemd_service": {
+    "service_name": "pi-grafana-dashboard",
+    "exec_model": "simple",
+    "restart_policy": {
+      "Restart": "always",
+      "RestartSec": 10
+    },
+    "resource_limits": {
+      "MemoryMaxMB": 60,
+      "CPUQuotaPercent": 25
+    },
+    "startup_behavior": {
+      "start_on_boot": true,
+      "no_dependency_on_network_ready": false
+    }
+  },
+  "non_goals": [
+    "no_csv",
+    "no_sql",
+    "no_prometheus",
+    "no_long_term_storage",
+    "no_file_rotation",
+    "no_background_threads"
+  ],
+  "guarantees": {
+    "crash_safe": true,
+    "reboot_safe": true,
+    "bounded_memory": true,
+    "no_sd_card_wear": true
+  }
+}

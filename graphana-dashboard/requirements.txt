@@ -1,0 +1,4 @@
+# Raspberry Pi Grafana Adapter Requirements
+# Python 3.9.2+ required
+# No external dependencies - uses only Python standard library
+
