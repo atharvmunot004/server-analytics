@@ -23,26 +23,26 @@ Design goals: minimal footprint, full user control, HPC-friendly, no UI dependen
 │  │ snapshot.sh │ ──────────────────►  │ metrics.json │                      │
 │  │ (collectors)│                      │ (last 100)   │                      │
 │  └─────────────┘                      └──────┬───────┘                      │
-│                                              │                               │
-│  ┌──────────────────────────────────────────▼──────────────────────────────┐│
-│  │ web_server.py (port 9000)                                                ││
-│  │ GET /latest  → latest metric JSON   GET /events → job events log         ││
+│                                              │                              │
+│  ┌───────────────────────────────────────────▼─────────────────────────────┐│
+│  │ web_server.py (port 9000)                                               ││
+│  │ GET /latest  → latest metric JSON   GET /events → job events log        ││
 │  └──────────────────────────────────────────┬──────────────────────────────┘│
 └─────────────────────────────────────────────┼───────────────────────────────┘
                                               │
                                     VPN / network
                                               │
 ┌─────────────────────────────────────────────▼───────────────────────────────┐
-│  RASPBERRY PI                                                                │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ dashboard_server.py (port 9100)                                      │   │
-│  │ Polls server:9000/latest → in-memory → derived rates                 │   │
-│  │ GET /metrics → JSON for Grafana   GET /health → ok|stale              │   │
-│  │ GET / → built-in HTML dashboard                                       │   │
-│  └─────────────────────────────────────────┬─────────────────────────────┘   │
-│                                             │                                │
+│  RASPBERRY PI                                                               │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ dashboard_server.py (port 9100)                                       │  │
+│  │ Polls server:9000/latest → in-memory → derived rates                  │  │
+│  │ GET /metrics → JSON for Grafana   GET /health → ok|stale              │  │
+│  │ GET / → built-in HTML dashboard                                       │  │
+│  └─────────────────────────────────────────┬─────────────────────────────┘  │
+│                                            │                                │
 │  ┌─────────────────────────────────────────▼─────────────────────────────┐  │
-│  │ Grafana (JSON datasource) → dashboards                                 │  │
+│  │ Grafana (JSON datasource) → dashboards                                │  │
 │  └───────────────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
